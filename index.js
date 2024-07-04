@@ -29,4 +29,23 @@ app.post('/item', function (req, res) {
   res.send('Item criado com sucesso!')
 })
 
+
+// Read By id - [GET] /item/:id
+app.get('/item/:id', function (req, res) {
+  // acesso ao parametros da rota id
+  const id = req.params.id
+  //acessar o id, através da rota
+  const item = list[id - 1]
+  res.send(`Olá, ${item}`)
+})
+
+
+// update - PUT
+app.put('/item/:id', function (req, res) {
+  const id = req.params.id
+  const novoItem = req.body.nome
+  list[id - 1] = novoItem
+  res.send(`Valor atualizado: ${novoItem}`)
+})
+
 app.listen(3000)
