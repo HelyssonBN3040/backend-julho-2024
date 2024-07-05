@@ -1,51 +1,69 @@
 const express = require('express')
+const { MongoClient, ObjectId } = require('mongodb')
 const app = express()
 
-const list = ['Rick Sanchez', 'Morty Smith', 'Summer Smith']
 
-app.get('/', function (req, res) {
-  res.send('Hello World')
-})
+const dbURL = 'mongodb+srv://admin:gmEmuTz9i8T0vCYR@cluster0.scztp2d.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+const dbName = 'ocean-jornada-backend'
 
-
-// consulta da lista
-app.get('/item', function (req, res) {
-  res.send(list)
-})
-
-// Sinalizamos para o Express que vamos usar JSON no Body
-app.use(express.json())
+const client = new MongoClient(dbURL)
 
 
-// Create - [POST] /item
-app.post('/item', function (req, res) {
-  // obtemos o nome da request
-  const item = req.body.nome
-
-  // Inseriu o nome na lista
-  list.push(item)
-
-  // Enviado uma mensagem com sucesso
-  res.send('Item criado com sucesso!')
-})
+async function main() {
+  console.log('Conectando ao banco de dados...')
+  await client.connect()
+  console.log('Banco de dados conectado com sucesso!')
 
 
-// Read By id - [GET] /item/:id
-app.get('/item/:id', function (req, res) {
-  // acesso ao parametros da rota id
-  const id = req.params.id
-  //acessar o id, através da rota
-  const item = list[id - 1]
-  res.send(`Olá, ${item}`)
-})
+  app.get('/', function (req, res) {
+    res.send('Hello World')
+  })
+
+  const db = client.db(dbName)
+  const collection = db.collection('item')
 
 
-// update - PUT
-app.put('/item/:id', function (req, res) {
-  const id = req.params.id
-  const novoItem = req.body.nome
-  list[id - 1] = novoItem
-  res.send(`Valor atualizado: ${novoItem}`)
-})
+  // consulta da lista
+  app.get('/item', async function (req, res) {
+    const documentos = await collection.find().toArray()
+    res.send(documentos)
+  })
 
-app.listen(3000)
+  // Sinalizamos para o Express que vamos usar JSON no Body
+  app.use(express.json())
+
+
+  // Create - [POST] /item
+  app.post('/item', async function (req, res) {
+    // obtemos o nome da request
+    const item = req.body
+    //inserimos o item na collection
+    await collection.insertOne(item)
+    // Enviado uma mensagem com sucesso
+    res.send(item)
+  })
+
+
+  // Read By id - [GET] /item/:id
+  app.get('/item/:id', async function (req, res) {
+    // acesso ao parametros da rota id
+    const id = req.params.id
+    //acessar o id, através da rota
+    const item = await collection.findOne({_id: new ObjectId(id)})
+    res.send(item)
+  })
+
+
+  // update - PUT
+  app.put('/item/:id', function (req, res) {
+    const id = req.params.id
+    const novoItem = req.body.nome
+    list[id - 1] = novoItem
+    res.send(`Valor atualizado: ${novoItem}`)
+  })
+
+  app.listen(3000)
+}
+
+
+main()
