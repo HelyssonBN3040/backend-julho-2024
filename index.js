@@ -54,12 +54,30 @@ async function main() {
   })
 
 
-  // update - PUT
-  app.put('/item/:id', function (req, res) {
+  // Update - PUT
+  app.put('/item/:id', async function (req, res) {
     const id = req.params.id
-    const novoItem = req.body.nome
-    list[id - 1] = novoItem
-    res.send(`Valor atualizado: ${novoItem}`)
+    const novoItem = req.body
+
+    await collection.updateOne(
+      {_id: new ObjectId(id)},
+      {$set: novoItem}
+    )
+    res.send(`Valor atualizado: ${id}`)
+  })
+
+  //Delete - [DELETE] /item/:id
+  app.delete('/item/:id', async function(req, res){
+    // acessando o parametro ID
+    const id = req.params.id
+
+    // Remove o item da collection pelo ObjectID
+    await collection.deleteOne(
+      {_id: new ObjectId(id)}
+    )
+    
+    // Enviamos o item da collection pelo ObjectID
+    res.send(`Item ${id}, foi removido com sucesso!`)
   })
 
   app.listen(3000)
