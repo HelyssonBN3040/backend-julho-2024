@@ -1,7 +1,12 @@
 const express = require('express')
+const cors = require('cors')
 const { MongoClient, ObjectId } = require('mongodb')
 const app = express()
 
+
+app.use(cors({
+  origin: 'http://localhost:3000'
+}))
 
 const dbURL = 'mongodb+srv://admin:gmEmuTz9i8T0vCYR@cluster0.scztp2d.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 const dbName = 'ocean-jornada-backend'
@@ -80,7 +85,7 @@ async function main() {
     res.send(`Item ${id}, foi removido com sucesso!`)
   })
 
-  app.listen(3000)
+  app.listen(5152)
 }
 
 
