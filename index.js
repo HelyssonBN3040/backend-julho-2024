@@ -1,5 +1,5 @@
 const express = require('express')
-const cors = requie('cors')
+const cors = require('cors')
 const { MongoClient, ObjectId } = require('mongodb')
 const app = express()
 
