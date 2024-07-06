@@ -1,7 +1,9 @@
 const express = require('express')
+const cors = require('cors')
 const { MongoClient, ObjectId } = require('mongodb')
 const app = express()
 
+app.use(cors())
 
 const dbURL = 'mongodb+srv://admin:gmEmuTz9i8T0vCYR@cluster0.scztp2d.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 const dbName = 'ocean-jornada-backend'
