@@ -15,14 +15,7 @@ async function main() {
 
   // Configura o CORS para permitir requisições do frontend hospedado no Vercel
   app.use(cors(
-    {
-      origin: 'https://register-clients.vercel.app', // substitua pela URL do seu frontend
-      methods: ['GET', 'POST', 'PUT', 'DELETE'], // métodos permitidos
-    },
-    {
-      origin: 'http://localhost:5173',
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    }
+
   ))
 
   app.get('/', function (req, res) {
@@ -57,27 +50,43 @@ async function main() {
 
   // Update - PUT
   app.put('/item/:id', async function (req, res) {
-    const id = req.params.id
-    const novoItem = req.body
+    const id = req.params.id;
+    const novoItem = req.body;
 
-    await collection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: novoItem }
-    )
-    res.send(`Valor atualizado: ${id}`)
-  })
+    try {
+      // Atualiza o documento com base no _id
+      const result = await collection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: novoItem }
+      );
+
+      // Verifica se algum documento foi modificado
+      if (result.modifiedCount === 0) {
+        return res.status(404).send('Item não encontrado ou nenhuma alteração feita');
+      }
+
+      res.send(`Valor atualizado: ${id}`);
+    } catch (error) {
+      console.error('Erro ao atualizar item:', error);
+      res.status(500).send('Erro ao atualizar item');
+    }
+  });
 
   // Delete - [DELETE] /item/:id
   app.delete('/item/:id', async function (req, res) {
-    const id = req.params.id
+    const id = req.params.id;
 
-    await collection.deleteOne(
-      { _id: new ObjectId(id) }
-    )
+    // Verifica se o ID tem 24 caracteres e é uma string hexadecimal
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send('ID inválido');
+    }
 
-    res.send(`Item ${id} foi removido com sucesso!`)
-  })
+    // Remove o item da collection pelo ObjectID
+    await collection.deleteOne({ _id: new ObjectId(id) });
 
+    // Enviamos uma mensagem de sucesso
+    res.send(`Item ${id} foi removido com sucesso!`);
+  });
   app.listen(5152)
 }
 
